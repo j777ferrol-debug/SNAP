@@ -45,6 +45,7 @@ var _string = @'{
 "d": 4//done
 }';
 
-show_debug_message(SnapFromJSON(_string));
+show_debug_message(SnapFromJSON(_string, true));
+show_debug_message(SnapToJSON(SnapFromJSON(_string, true), true, false, false, true));
 
 show_debug_message(SnapFromJSON("{\"f\":\"a\\\\b\"}"));

@@ -1,5 +1,5 @@
 <p align="center"><img src="https://raw.githubusercontent.com/JujuAdams/SNAP/master/LOGO.png" style="display:block; margin:auto; width:300px"></p>
-<h1 align="center">SNAP 7.0.3</h1>
+<h1 align="center">SNAP 8.1.0</h1>
 
 <p align="center">Data format converters for GameMaker LTS 2022</p>
 
