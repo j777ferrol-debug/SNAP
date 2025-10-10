@@ -5,7 +5,7 @@
 /// @param string                   The JSON string to be decoded
 /// @param [trackFieldOrder=false]  Whether to track the order of struct fields as they appear in the JSON string (stored in __snapFieldOrder field on each GML struct)
 /// 
-/// @jujuadams 2022-10-30
+/// Juju Adams 2025-10-10
 
 function SnapFromJSON(_string, _trackFieldOrder = false)
 {

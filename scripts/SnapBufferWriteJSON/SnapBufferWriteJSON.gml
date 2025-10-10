@@ -8,7 +8,7 @@
 /// @param [accurateFloats=true]       (bool) Whether to output floats at a higher accuracy than GM normally defaults to. Setting this to <true> confers a performance penalty
 /// @param [useFieldOrder=true]        (bool) Whether to respect the special .__snapFieldOrder array when writing struct fields
 /// 
-/// @jujuadams 2022-10-30
+/// Juju Adams 2025-10-10
 
 function SnapBufferWriteJSON(_buffer, _value, _pretty = false, _alphabetise = false, _accurateFloats = false, _useFieldOrder = true)
 {
