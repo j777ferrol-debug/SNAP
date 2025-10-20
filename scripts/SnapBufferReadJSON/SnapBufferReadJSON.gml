@@ -5,7 +5,7 @@
 /// @param offset                   Offset in the buffer to read data from
 /// @param [trackFieldOrder=false]  Whether to track the order of struct fields as they appear in the JSON string (stored in __snapFieldOrder field on each GML struct)
 /// 
-/// Juju Adams 2025-10-10
+/// Juju Adams 2025-10-20
 
 function SnapBufferReadJSON(_buffer, _inOffset = undefined, _trackFieldOrder = false)
 {
