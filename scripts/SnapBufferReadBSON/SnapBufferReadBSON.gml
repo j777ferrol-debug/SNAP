@@ -1,0 +1,164 @@
+// Feather disable all
+/// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for interchanging data
+/// across networks due to it being fast and somewhat efficient. This particular BSON reader will not validate
+/// the sizes of containers or strings.
+///
+/// BSON spec:   `https://bsonspec.org/spec.html`
+/// BSON tester: `https://mcraiha.github.io/tools/BSONhexToJSON/bsonfiletojson.html`
+///
+/// @return Nested struct/array data encoded from the buffer, using Binary JSON
+/// 
+/// @param buffer  Binary data to be decoded, created by SnapBufferWriteBSON()
+/// @param offset  Start position for binary decoding in the buffer. Defaults to 0, the start of the buffer
+/// @param [skipEmbeddedBuffers]  Skip past any embedded buffers. Defaults to 0.
+
+/*
+    0x00  -  EOO (end of object)
+    0x01  -  double
+    0x02  -  string
+    0x03  -  document (struct)
+    0x04  -  array
+    0x05  -  binary blob
+    0x06  -  <undefined>
+    0x07  -  object ID
+    0x08  -  boolean
+    0x09  -  UTCdatetime
+    0x0A  -  <null>
+    0x10  -  int32
+	0x11  -  uint64
+	0x12  -  int64
+*/
+
+function SnapBufferReadBSON(_buffer, _offset, _skipEmbeddedBuffers = false)
+{
+    var _oldOffset = buffer_tell(_buffer);
+    buffer_seek(_buffer, buffer_seek_start, _offset);
+    var _value = __SnapFromBSONValue(_buffer, undefined);
+    buffer_seek(_buffer, buffer_seek_start, _oldOffset);
+    return _value;
+}
+
+function __SnapFromBSONValue(_buffer, _container = undefined)
+{
+    var _datatype = 0x03;
+    var _name = undefined;
+    
+    if (_container != undefined)
+    {
+        _datatype = buffer_read(_buffer, buffer_u8);
+        _name = buffer_read(_buffer, buffer_string);
+    }
+    
+    switch(_datatype)
+    {
+        case 0x03: // struct / document
+            buffer_read(_buffer, buffer_s32); // skip past the size of the object
+            var _struct = {  };
+            var _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
+            
+            // Check to make sure that we haven't hit the end of the struct as it's null terminated
+            while(_nextType != 0x00)
+            {
+                __SnapFromBSONValue(_buffer, _struct);
+                show_debug_message(buffer_tell(_buffer));
+                _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
+            }
+            
+            buffer_read(_buffer, buffer_u8);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _struct);
+            
+            return _struct;
+        break;
+        
+        case 0x04: // array
+            buffer_read(_buffer, buffer_s32); // skip past the size of the object
+            var _array = [  ];
+            var _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
+            
+            // Check to make sure that we haven't hit the end of the array as it's null terminated
+            while(_nextType != 0x00)
+            {
+                __SnapFromBSONValue(_buffer, _array);
+                show_debug_message(buffer_tell(_buffer));
+                _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
+            }
+            
+            buffer_read(_buffer, buffer_u8);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _array);
+            
+            return _array;
+        break;
+        
+        case 0x02: // string
+            buffer_read(_buffer, buffer_s32); // Skip past string size
+            var _value = buffer_read(_buffer, buffer_string);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
+        break;
+        
+        case 0x01: // f64
+            var _value = buffer_read(_buffer, buffer_f64);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value
+        break;
+        
+        case 0x05: // Buffer blob
+            var _bufferSize = buffer_read(_buffer, buffer_s32);
+            var _bufferType = 128 - buffer_read(_buffer, buffer_u8); // 128+ is user-definable
+            _bufferType = (_bufferType >= 0 or _bufferType < 4) ? _bufferType : buffer_grow;
+            
+            var _value = buffer_create(_bufferSize, _bufferType, 1);
+            buffer_copy(_buffer, buffer_tell(_buffer), _bufferSize, _value, 0);
+            buffer_seek(_buffer, buffer_seek_relative, _bufferSize);
+            
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            
+            return _value;
+        case 0x06: // undefined
+            __SnapBufferReadBSONAddToContainer(_container, _name, undefined);
+            return undefined;
+        break;
+        
+        case 0x08: // boolean
+            var _value = bool(buffer_read(_buffer, buffer_u8));
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
+        break;
+        
+        case 0x10: // s32
+            var _value = buffer_read(_buffer, buffer_s32);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return buffer_read(_buffer, _value);
+        break;
+        
+        case 0x12: // u64
+            var _value = int64(buffer_read(_buffer, buffer_u64));
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value
+        break;
+        
+        default:
+            show_error("SNAP:\nUnsupported datatype " + string(buffer_peek(_buffer, buffer_u8, buffer_tell(_buffer)-1)) + " (position = " + string(buffer_tell(_buffer) - 1) + ")\n of name " + _name + "\n", false);
+        break;
+    }
+}
+
+function __SnapBufferReadBSONAddToContainer(_container, _name, _value)
+{
+    if (is_undefined(_container))
+    {
+        return;
+    }
+    else if (is_struct(_container))
+    {
+        _container[$ _name] = _value;
+    }
+    else if (is_array(_container))
+    {
+        array_push(_container, _value);
+    }
+    else
+    {
+        show_error("SNAP:\nBSON Read add to container failed. \n", true);
+    }
+}
