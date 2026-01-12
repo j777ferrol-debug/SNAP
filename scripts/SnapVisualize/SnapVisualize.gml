@@ -155,6 +155,10 @@ function __SnapVisualizeInner(_buffer, _prefix, _value, _referenceMap)
             buffer_write(_buffer, buffer_text, "\"");
         }
     }
+    else if (is_bool(_value))
+    {
+        buffer_write(_buffer, buffer_text, _value? " true" : " false");
+    }
     else
     {
         buffer_write(_buffer, buffer_text, " "); // space
@@ -286,6 +290,10 @@ function __SnapVisualizeASCIIInner(_buffer, _prefix, _value, _referenceMap)
             buffer_write(_buffer, buffer_text, _value);
             buffer_write(_buffer, buffer_text, "\"");
         }
+    }
+    else if (is_bool(_value))
+    {
+        buffer_write(_buffer, buffer_text, _value? " true" : " false");
     }
     else
     {
