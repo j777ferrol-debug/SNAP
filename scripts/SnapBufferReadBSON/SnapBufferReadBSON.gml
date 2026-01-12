@@ -33,12 +33,12 @@ function SnapBufferReadBSON(_buffer, _offset, _skipEmbeddedBuffers = false)
 {
     var _oldOffset = buffer_tell(_buffer);
     buffer_seek(_buffer, buffer_seek_start, _offset);
-    var _value = __SnapFromBSONValue(_buffer, undefined);
+    var _value = __SnapFromBSONValue(_buffer, undefined, _skipEmbeddedBuffers);
     buffer_seek(_buffer, buffer_seek_start, _oldOffset);
     return _value;
 }
 
-function __SnapFromBSONValue(_buffer, _container = undefined)
+function __SnapFromBSONValue(_buffer, _container = undefined, _skipEmbeddedBuffers = undefined)
 {
     var _datatype = 0x03;
     var _name = undefined;
@@ -59,8 +59,7 @@ function __SnapFromBSONValue(_buffer, _container = undefined)
             // Check to make sure that we haven't hit the end of the struct as it's null terminated
             while(_nextType != 0x00)
             {
-                __SnapFromBSONValue(_buffer, _struct);
-                show_debug_message(buffer_tell(_buffer));
+                __SnapFromBSONValue(_buffer, _struct, _skipEmbeddedBuffers);
                 _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
             }
             
@@ -78,8 +77,7 @@ function __SnapFromBSONValue(_buffer, _container = undefined)
             // Check to make sure that we haven't hit the end of the array as it's null terminated
             while(_nextType != 0x00)
             {
-                __SnapFromBSONValue(_buffer, _array);
-                show_debug_message(buffer_tell(_buffer));
+                __SnapFromBSONValue(_buffer, _array, _skipEmbeddedBuffers);
                 _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
             }
             
@@ -106,12 +104,20 @@ function __SnapFromBSONValue(_buffer, _container = undefined)
             var _bufferSize = buffer_read(_buffer, buffer_s32);
             var _bufferType = 128 - buffer_read(_buffer, buffer_u8); // 128+ is user-definable
             _bufferType = (_bufferType >= 0 or _bufferType < 4) ? _bufferType : buffer_grow;
+			
+			// Skip if user doesn't care about the buffers
+			if (_skipEmbeddedBuffers)
+			{
+	            buffer_seek(_buffer, buffer_seek_relative, _bufferSize);
+			}
+			else
+			{
+	            var _value = buffer_create(_bufferSize, _bufferType, 1);
+	            buffer_copy(_buffer, buffer_tell(_buffer), _bufferSize, _value, 0);
+	            buffer_seek(_buffer, buffer_seek_relative, _bufferSize);
             
-            var _value = buffer_create(_bufferSize, _bufferType, 1);
-            buffer_copy(_buffer, buffer_tell(_buffer), _bufferSize, _value, 0);
-            buffer_seek(_buffer, buffer_seek_relative, _bufferSize);
-            
-            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+				__SnapBufferReadBSONAddToContainer(_container, _name, _value);
+			}
             
             return _value;
         case 0x06: // undefined
