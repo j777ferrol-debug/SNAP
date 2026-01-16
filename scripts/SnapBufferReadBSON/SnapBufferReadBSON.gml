@@ -3,14 +3,17 @@
 /// across networks due to it being fast and somewhat efficient. This particular BSON reader will not validate
 /// the sizes of containers or strings.
 ///
+///	Unsupported un-deprecated types: objectID, UTCdatetime, null, uint64, regex, JScode, float128, min key, max key.
+///
 /// BSON spec:   `https://bsonspec.org/spec.html`
 /// BSON tester: `https://mcraiha.github.io/tools/BSONhexToJSON/bsonfiletojson.html`
 ///
 /// @return Nested struct/array data encoded from the buffer, using Binary JSON
 /// 
-/// @param buffer  Binary data to be decoded, created by SnapBufferWriteBSON()
-/// @param offset  Start position for binary decoding in the buffer. Defaults to 0, the start of the buffer
-/// @param [skipEmbeddedBuffers]  Skip past any embedded buffers. Defaults to 0.
+/// @param buffer                           Binary data to be decoded, created by SnapBufferWriteBSON()
+/// @param offset                           Start position for binary decoding in the buffer. Defaults to 0, the start of the buffer
+/// @param [skipEmbeddedBuffers=true]       Skip past any embedded buffers. Defaults to 0.
+/// @param [embeddedBufferType=undefined]   Overrides the internal buffer subtype for embedded buffers, see `subtype` in the spec for more information.
 
 /*
     0x00  -  EOO (end of object)
@@ -29,16 +32,16 @@
 	0x12  -  int64
 */
 
-function SnapBufferReadBSON(_buffer, _offset, _skipEmbeddedBuffers = false)
+function SnapBufferReadBSON(_buffer, _offset, _skipEmbeddedBuffers = false, _embeddedBufferType = undefined)
 {
     var _oldOffset = buffer_tell(_buffer);
     buffer_seek(_buffer, buffer_seek_start, _offset);
-    var _value = __SnapFromBSONValue(_buffer, undefined, _skipEmbeddedBuffers);
+    var _value = __SnapFromBSONValue(_buffer, undefined, _skipEmbeddedBuffers, _embeddedBufferType);
     buffer_seek(_buffer, buffer_seek_start, _oldOffset);
     return _value;
 }
 
-function __SnapFromBSONValue(_buffer, _container = undefined, _skipEmbeddedBuffers = undefined)
+function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embeddedBufferType)
 {
     var _datatype = 0x03;
     var _name = undefined;
@@ -59,7 +62,7 @@ function __SnapFromBSONValue(_buffer, _container = undefined, _skipEmbeddedBuffe
             // Check to make sure that we haven't hit the end of the struct as it's null terminated
             while(_nextType != 0x00)
             {
-                __SnapFromBSONValue(_buffer, _struct, _skipEmbeddedBuffers);
+                __SnapFromBSONValue(_buffer, _struct, _skipEmbeddedBuffers, _embeddedBufferType);
                 _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
             }
             
@@ -77,7 +80,7 @@ function __SnapFromBSONValue(_buffer, _container = undefined, _skipEmbeddedBuffe
             // Check to make sure that we haven't hit the end of the array as it's null terminated
             while(_nextType != 0x00)
             {
-                __SnapFromBSONValue(_buffer, _array, _skipEmbeddedBuffers);
+                __SnapFromBSONValue(_buffer, _array, _skipEmbeddedBuffers, _embeddedBufferType);
                 _nextType = buffer_peek(_buffer, buffer_tell(_buffer), buffer_u8);
             }
             
@@ -103,7 +106,14 @@ function __SnapFromBSONValue(_buffer, _container = undefined, _skipEmbeddedBuffe
         case 0x05: // Buffer blob
             var _bufferSize = buffer_read(_buffer, buffer_s32);
             var _bufferType = 128 - buffer_read(_buffer, buffer_u8); // 128+ is user-definable
-            _bufferType = (_bufferType >= 0 or _bufferType < 4) ? _bufferType : buffer_grow;
+            if (_embeddedBufferType == undefined)
+            {
+                _bufferType = (_bufferType >= 0 or _bufferType < 4) ? _bufferType : buffer_grow;
+            }
+            else
+            {
+                _bufferType = _embeddedBufferType;
+            }
 			
 			// Skip if user doesn't care about the buffers
 			if (_skipEmbeddedBuffers)
@@ -122,6 +132,7 @@ function __SnapFromBSONValue(_buffer, _container = undefined, _skipEmbeddedBuffe
             return _value;
         case 0x06: // undefined
             __SnapBufferReadBSONAddToContainer(_container, _name, undefined);
+		    show_debug_message("SnapBSON: Undefined is a deprecated type, please avoid use");
             return undefined;
         break;
         

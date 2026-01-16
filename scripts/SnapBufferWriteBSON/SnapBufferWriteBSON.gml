@@ -2,6 +2,9 @@
 /// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for interchanging data
 /// across networks due to it being fast and somewhat efficient.
 ///
+///	Unsupported un-deprecated types: objectID, UTCdatetime, null, uint64, regex, JScode, float128, min key, max key.
+/// LTS does not support writing binary blobs.
+///
 /// BSON spec:   `https://bsonspec.org/spec.html`
 /// BSON tester: `https://mcraiha.github.io/tools/BSONhexToJSON/bsonfiletojson.html`
 /// 
@@ -10,6 +13,7 @@
 /// @param buffer                      Buffer to write data to
 /// @param struct/array                The data to be encoded. Can contain structs, arrays, strings, and numbers.   N.B. Will not encode ds_list, ds_map etc.
 /// @param [alphabetizeStructs=false]  Whether to alphabetize struct variable names. Incurs a performance penalty is set to <true>
+/// @param [binaryBlobType=undefined]  The binary blob type to use, leave as `undefined` to encode the buffer_type as 128-131. See `subtype` in the spec for more information
 
 /*
     0x00  -  EOO (end of object)
@@ -28,7 +32,7 @@
 	0x12  -  int64
 */
 
-function SnapBufferWriteBSON(_buffer, _value, _alphabetizeStructs = false)
+function SnapBufferWriteBSON(_buffer, _value, _alphabetizeStructs = false, _binaryBlobType = undefined)
 {
     // BSON must have a document as the first element type, we make no assumsions here or change
     // how the data looks, so we just error out instead.
@@ -58,7 +62,7 @@ function SnapBufferWriteBSON(_buffer, _value, _alphabetizeStructs = false)
     
     if (_useLegacy)
     {
-        return __SnapBufferWriteBSONLegacy(_buffer, undefined, _value, _alphabetizeStructs);
+        return __SnapBufferWriteBSONLegacy(_buffer, undefined, _value, _alphabetizeStructs, _binaryBlobType);
     }
     else
     {
@@ -66,9 +70,10 @@ function SnapBufferWriteBSON(_buffer, _value, _alphabetizeStructs = false)
         {
             __buffer = _buffer;
             __alphabetizeStructs = _alphabetizeStructs;
+			__binaryBlobType = _binaryBlobType;
         }
         
-        return __SnapBufferWriteBSON(_buffer, undefined, _value, _alphabetizeStructs);
+        return __SnapBufferWriteBSON(_buffer, undefined, _value, _alphabetizeStructs, _binaryBlobType);
     }
 }
 
@@ -79,19 +84,20 @@ function __SnapBufferWriteBSONStructIteratorMethod()
         {
             __buffer: undefined,
             __alphabetizeStructs: false,
+			__binaryBlobType: undefined,
         },
         function(_name, _value)
         {
             if (!is_string(_name)) show_error("SNAP:\nKeys must be strings\n ", true);
             
-            __SnapBufferWriteBSON(__buffer, _name, _value, __alphabetizeStructs);
+            __SnapBufferWriteBSON(__buffer, _name, _value, __alphabetizeStructs, __binaryBlobType);
         }
     );
     
     return _method;
 }
 
-function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs)
+function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _binaryBlobType)
 {
     static _structIteratorMethod = __SnapBufferWriteBSONStructIteratorMethod();
     
@@ -133,7 +139,7 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs)
                     var _varName = _names[_i];
                     if (!is_string(_varName)) show_error("SNAP:\nKeys must be strings\n ", true);
                     
-                    __SnapBufferWriteBSON(_buffer, _varName, _struct[$ _varName], _alphabetizeStructs);
+                    __SnapBufferWriteBSON(_buffer, _varName, _struct[$ _varName], _alphabetizeStructs, _binaryBlobType);
                 
                     ++_i;
                 }
@@ -174,7 +180,7 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs)
         {
             // BSON stores arrays as if it's a struct with each index being a struct variable.
             // Example: `{ "0": "Hello World!", "1": 98174, "2": "Why does it do this?" }`.
-            __SnapBufferWriteBSON(_buffer, _i, _array[_i], _alphabetizeStructs);
+            __SnapBufferWriteBSON(_buffer, _i, _array[_i], _alphabetizeStructs, _binaryBlobType);
             ++_i;
         }
         
@@ -212,6 +218,7 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs)
     {
         buffer_write(_buffer, buffer_u8, 0x06); //<undefined>
         buffer_write(_buffer, buffer_string, _name);
+		show_debug_message("SnapBSON: Undefined is a deprecated type, please avoid use");
     }
     else if (is_int32(_value))
     {
@@ -235,12 +242,28 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs)
             var _bufferSize = buffer_get_size(_value);
             if (_bufferSize > 0x7FFFFFFF) show_error("SNAP:\nBSON blob size cannot exceed the 32-bit signed integer limit. \n", true);
             
-            buffer_write(_buffer, buffer_s32, _bufferSize);
-            buffer_write(_buffer, buffer_u8, 128 + buffer_get_type(_value)); // 128+ are user-definable, so we can make use by saving the buffer type
+	        buffer_write(_buffer, buffer_s32, _bufferSize);
+			
+			if (_binaryBlobType == undefined)
+			{
+	            buffer_write(_buffer, buffer_u8, 128 + buffer_get_type(_value)); // 128+ are user-definable, so we can make use by saving the buffer type
+			}
+			else
+			{
+                if (_binaryBlobType < 0 or _binaryBlobType > 255)
+                {
+                    show_error("SNAP:\nBinary blob subtype must be between 0 and 255.\n", true);
+                }
+                buffer_write(_buffer, buffer_u8, _binaryBlobType);
+			}
             
             buffer_copy(_value, 0, _bufferSize, _buffer, buffer_tell(_buffer));
             buffer_seek(_buffer, buffer_seek_relative, _bufferSize);
         }
+		else
+		{
+			show_message("Handle \"" + typeof(_value) + "\" not supported");
+		}
     }
     else
     {
@@ -251,7 +274,7 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs)
 }
 
 //Legacy version for LTS use
-function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs)
+function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs, _binaryBlobType)
 {
     if (is_method(_value)) //Implicitly also a struct so we have to check this first
     {
@@ -362,6 +385,7 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
     {
         buffer_write(_buffer, buffer_u8, 0x06); //<undefined>
         buffer_write(_buffer, buffer_string, _name);
+		show_debug_message("SnapBSON: Undefined is a deprecated type, please avoid use");
     }
     else if (is_int32(_value))
     {
