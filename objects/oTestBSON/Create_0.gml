@@ -24,6 +24,8 @@ struct = {
     test2 : "\"Hello world!\"",
     url : "https://www.jujuadams.com/",
     func : function() {},
+    objectID: new SnapBSONObjectID(),
+    dateTime: new SnapBSONUTCDateTime(),
     //pointer: ptr(id),
     //instance: id,
 };

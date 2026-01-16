@@ -106,51 +106,61 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
     }
     else if (is_struct(_value))
     {
-        var _struct = _value;
-        var _count = variable_struct_names_count(_struct);
-        
-        // We only write the type if we are not at the root document        
-        if (_name != undefined)
+        // Before we write the struct let's check for any extended types
+        if (variable_struct_exists(_value, "__BSONType"))
         {
-            buffer_write(_buffer, buffer_u8, 0x03); //Struct / document
+            buffer_write(_buffer, buffer_u8, _value[$ "__BSONType"]);
             buffer_write(_buffer, buffer_string, _name);
+            _value.ToBuffer(_buffer);
         }
-        
-        // Starting offset
-        var _startingOffset = buffer_tell(_buffer);
-        
-        // Size placeholder
-        buffer_write(_buffer, buffer_s32, 0);
-        
-        if (_count > 0)
+        else
         {
-            if (_alphabetizeStructs)
+            var _struct = _value;
+            var _count = variable_struct_names_count(_struct);
+        
+            // We only write the type if we are not at the root document        
+            if (_name != undefined)
             {
-                var _names = variable_struct_get_names(_struct);
-                array_sort(_names, true);
-                var _i = 0;
-                repeat(_count)
+                buffer_write(_buffer, buffer_u8, 0x03); //Struct / document
+                buffer_write(_buffer, buffer_string, _name);
+            }
+        
+            // Starting offset
+            var _startingOffset = buffer_tell(_buffer);
+        
+            // Size placeholder
+            buffer_write(_buffer, buffer_s32, 0);
+        
+            if (_count > 0)
+            {
+                if (_alphabetizeStructs)
                 {
-                    var _varName = _names[_i];
-                    if (!is_string(_varName)) show_error("SNAP:\nKeys must be strings\n ", true);
+                    var _names = variable_struct_get_names(_struct);
+                    array_sort(_names, true);
+                    var _i = 0;
+                    repeat(_count)
+                    {
+                        var _varName = _names[_i];
+                        if (!is_string(_varName)) show_error("SNAP:\nKeys must be strings\n ", true);
                     
-                    __SnapBufferWriteBSON(_buffer, _varName, _struct[$ _varName], _alphabetizeStructs, _binaryBlobType);
+                        __SnapBufferWriteBSON(_buffer, _varName, _struct[$ _varName], _alphabetizeStructs, _binaryBlobType);
                 
-                    ++_i;
+                        ++_i;
+                    }
+                }
+                else
+                {
+                    struct_foreach(_struct, _structIteratorMethod);
                 }
             }
-            else
-            {
-                struct_foreach(_struct, _structIteratorMethod);
-            }
+        
+            // Terminate document
+            buffer_write(_buffer, buffer_u8, 0x00);
+        
+            // Tracking
+            var _endingOffset = buffer_tell(_buffer);
+            buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
         }
-        
-        // Terminate document
-        buffer_write(_buffer, buffer_u8, 0x00);
-        
-        // Tracking
-        var _endingOffset = buffer_tell(_buffer);
-        buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
     }
     else if (is_array(_value))
     {
@@ -271,43 +281,53 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
     }
     else if (is_struct(_value))
     {
-        var _struct = _value;
-        
-        var _names = variable_struct_get_names(_struct);
-        if (_alphabetizeStructs && is_array(_names)) array_sort(_names, true);
-        
-        var _count = array_length(_names);
-        
-        // We only write the type if we are not at the root document        
-        if (_name != undefined)
+        // Before we write the struct let's check for any extended types
+        if (variable_struct_exists(_value, "__BSONType"))
         {
-            buffer_write(_buffer, buffer_u8, 0x03); //Struct / document
+            buffer_write(_buffer, buffer_u8, _value[$ "__BSONType"]);
             buffer_write(_buffer, buffer_string, _name);
+            _value.ToBuffer(_buffer);
         }
-        
-        // Starting offset
-        var _startingOffset = buffer_tell(_buffer);
-        
-        // Size placeholder
-        buffer_write(_buffer, buffer_s32, 0);
-        
-        var _i = 0;
-        repeat(_count)
+        else
         {
-            var _varName = _names[_i];
-            if (!is_string(_varName)) show_error("SNAP:\nKeys must be strings\n ", true);
+            var _struct = _value;
+        
+            var _names = variable_struct_get_names(_struct);
+            if (_alphabetizeStructs && is_array(_names)) array_sort(_names, true);
+        
+            var _count = array_length(_names);
+        
+            // We only write the type if we are not at the root document        
+            if (_name != undefined)
+            {
+                buffer_write(_buffer, buffer_u8, 0x03); //Struct / document
+                buffer_write(_buffer, buffer_string, _name);
+            }
+        
+            // Starting offset
+            var _startingOffset = buffer_tell(_buffer);
+        
+            // Size placeholder
+            buffer_write(_buffer, buffer_s32, 0);
+        
+            var _i = 0;
+            repeat(_count)
+            {
+                var _varName = _names[_i];
+                if (!is_string(_varName)) show_error("SNAP:\nKeys must be strings\n ", true);
             
-            __SnapBufferWriteBSONLegacy(_buffer, _varName, _struct[$ _varName], _alphabetizeStructs);
+                __SnapBufferWriteBSONLegacy(_buffer, _varName, _struct[$ _varName], _alphabetizeStructs);
             
-            ++_i;
+                ++_i;
+            }
+        
+            // Terminate document
+            buffer_write(_buffer, buffer_u8, 0x00);
+        
+            // Tracking
+            var _endingOffset = buffer_tell(_buffer);
+            buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
         }
-        
-        // Terminate document
-        buffer_write(_buffer, buffer_u8, 0x00);
-        
-        // Tracking
-        var _endingOffset = buffer_tell(_buffer);
-        buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
     }
     else if (is_array(_value))
     {

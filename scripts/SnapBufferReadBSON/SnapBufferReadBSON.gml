@@ -130,11 +130,18 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
 			}
             
             return _value;
+        
         case 0x06: // undefined
             __SnapBufferReadBSONAddToContainer(_container, _name, undefined);
 		    show_debug_message("SnapBSON: Undefined is a deprecated type, please avoid use");
             return undefined;
         break;
+        
+        case 0x07: // objectID
+            _value = new SnapBSONObjectID(undefined);
+            _value.FromBuffer(_buffer);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
         
         case 0x08: // boolean
             var _value = bool(buffer_read(_buffer, buffer_u8));
@@ -142,13 +149,19 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
             return _value;
         break;
         
+        case 0x09: // UTC datetime
+            _value = new SnapBSONUTCDateTime(undefined);
+            _value.FromBuffer(_buffer);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
+        
         case 0x10: // s32
             var _value = buffer_read(_buffer, buffer_s32);
             __SnapBufferReadBSONAddToContainer(_container, _name, _value);
             return buffer_read(_buffer, _value);
         break;
         
-        case 0x12: // u64
+        case 0x12: // s64
             var _value = int64(buffer_read(_buffer, buffer_u64));
             __SnapBufferReadBSONAddToContainer(_container, _name, _value);
             return _value
