@@ -56,13 +56,9 @@ function SnapBufferWriteBSON(_buffer, _value, _alphabetizeStructs = false, _bina
         }
     }
     
-    // Set up some tracking here
-    __SnapBSON().__currentDocumentLevel = -1;
-    __SnapBSON().__documentStartOffsets = [  ];
-    
     if (_useLegacy)
     {
-        return __SnapBufferWriteBSONLegacy(_buffer, undefined, _value, _alphabetizeStructs, _binaryBlobType);
+        return __SnapBufferWriteBSONLegacy(_buffer, undefined, _value, _alphabetizeStructs);
     }
     else
     {
@@ -120,9 +116,8 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
             buffer_write(_buffer, buffer_string, _name);
         }
         
-        // Tracking
-        array_push(__SnapBSON().__documentStartOffsets, buffer_tell(_buffer));
-        __SnapBSON().__currentDocumentLevel++;
+        // Starting offset
+        var _startingOffset = buffer_tell(_buffer);
         
         // Size placeholder
         buffer_write(_buffer, buffer_s32, 0);
@@ -154,12 +149,8 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
         buffer_write(_buffer, buffer_u8, 0x00);
         
         // Tracking
-        var _startOffset = __SnapBSON().__documentStartOffsets[__SnapBSON().__currentDocumentLevel];
-        var _endOffset = buffer_tell(_buffer);
-        buffer_poke(_buffer, _startOffset, buffer_s32, _endOffset - _startOffset);
-        
-        array_pop(__SnapBSON().__documentStartOffsets);
-        __SnapBSON().__currentDocumentLevel--;
+        var _endingOffset = buffer_tell(_buffer);
+        buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
     }
     else if (is_array(_value))
     {
@@ -169,9 +160,8 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
         buffer_write(_buffer, buffer_u8, 0x04); ///Array
         buffer_write(_buffer, buffer_string, _name);
         
-        // Tracking
-        array_push(__SnapBSON().__documentStartOffsets, buffer_tell(_buffer));
-        __SnapBSON().__currentDocumentLevel++;
+        // Starting offset
+        var _startingOffset = buffer_tell(_buffer);
         
         buffer_write(_buffer, buffer_s32, 0);
         
@@ -188,12 +178,8 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
         buffer_write(_buffer, buffer_u8, 0);
         
         // Tracking
-        var _startOffset = __SnapBSON().__documentStartOffsets[__SnapBSON().__currentDocumentLevel];
-        var _endOffset = buffer_tell(_buffer);
-        buffer_poke(_buffer, _startOffset, buffer_s32, _endOffset - _startOffset);
-        
-        array_pop(__SnapBSON().__documentStartOffsets);
-        __SnapBSON().__currentDocumentLevel--;
+        var _endingOffset = buffer_tell(_buffer);
+        buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
     }
     else if (is_string(_value))
     {
@@ -274,7 +260,7 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
 }
 
 //Legacy version for LTS use
-function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs, _binaryBlobType)
+function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs)
 {
     if (is_method(_value)) //Implicitly also a struct so we have to check this first
     {
@@ -299,9 +285,8 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
             buffer_write(_buffer, buffer_string, _name);
         }
         
-        // Tracking
-        array_push(__SnapBSON().__documentStartOffsets, buffer_tell(_buffer));
-        __SnapBSON().__currentDocumentLevel++;
+        // Starting offset
+        var _startingOffset = buffer_tell(_buffer);
         
         // Size placeholder
         buffer_write(_buffer, buffer_s32, 0);
@@ -321,12 +306,8 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
         buffer_write(_buffer, buffer_u8, 0x00);
         
         // Tracking
-        var _startOffset = __SnapBSON().__documentStartOffsets[__SnapBSON().__currentDocumentLevel];
-        var _endOffset = buffer_tell(_buffer);
-        buffer_poke(_buffer, _startOffset, buffer_s32, _endOffset - _startOffset);
-        
-        array_pop(__SnapBSON().__documentStartOffsets);
-        __SnapBSON().__currentDocumentLevel--;
+        var _endingOffset = buffer_tell(_buffer);
+        buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
     }
     else if (is_array(_value))
     {
@@ -336,9 +317,8 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
         buffer_write(_buffer, buffer_u8, 0x04); ///Array
         buffer_write(_buffer, buffer_string, _name);
         
-        // Tracking
-        array_push(__SnapBSON().__documentStartOffsets, buffer_tell(_buffer));
-        __SnapBSON().__currentDocumentLevel++;
+        // Starting offset
+        var _startingOffset = buffer_tell(_buffer);
         
         buffer_write(_buffer, buffer_s32, 0);
         
@@ -355,12 +335,8 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
         buffer_write(_buffer, buffer_u8, 0);
         
         // Tracking
-        var _startOffset = __SnapBSON().__documentStartOffsets[__SnapBSON().__currentDocumentLevel];
-        var _endOffset = buffer_tell(_buffer);
-        buffer_poke(_buffer, _startOffset, buffer_s32, _endOffset - _startOffset);
-        
-        array_pop(__SnapBSON().__documentStartOffsets);
-        __SnapBSON().__currentDocumentLevel--;
+        var _endingOffset = buffer_tell(_buffer);
+        buffer_poke(_buffer, _startingOffset, buffer_s32, _endingOffset - _startingOffset);
     }
     else if (is_string(_value))
     {
