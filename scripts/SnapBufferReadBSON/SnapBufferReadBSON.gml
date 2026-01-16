@@ -3,7 +3,7 @@
 /// across networks due to it being fast and somewhat efficient. This particular BSON reader will not validate
 /// the sizes of containers or strings.
 ///
-///	Unsupported un-deprecated types: objectID, UTCdatetime, null, uint64, regex, JScode, float128, min key, max key.
+///	Unsupported non-deprecated types: objectID, UTCdatetime, null, uint64, regex, JScode, float128, min key, max key.
 ///
 /// BSON spec:   `https://bsonspec.org/spec.html`
 /// BSON tester: `https://mcraiha.github.io/tools/BSONhexToJSON/bsonfiletojson.html`
