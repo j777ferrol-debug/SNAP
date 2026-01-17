@@ -1,7 +1,7 @@
 // Feather disable all
-/// A UTC datetime based on the unix epoch.
+/// A UTC datetime based on the unix epoch in milliseconds.
 ///
-/// @param [timestamp=date_current_datetime()] The timestamp to initialize the UTC datetime with.
+/// @param [timestamp=date_current_datetime()] The GameMaker timestamp to initialize the UTC datetime with.
 
 function SnapBSONUTCDateTime(_timestamp = date_current_datetime()) constructor
 {
@@ -15,12 +15,14 @@ function SnapBSONUTCDateTime(_timestamp = date_current_datetime()) constructor
     
     static ToBuffer = function(_buffer)
     {
-        buffer_write(_buffer, buffer_u64, floor(date_second_span(date_create_datetime(1970, 1, 1, 0, 0, 0), timestamp)));
+        // UTC timestamp is stored in milliseconds for some reason
+        buffer_write(_buffer, buffer_u64, floor(date_second_span(date_create_datetime(1970, 1, 1, 0, 0, 0), timestamp) * 1000));
     }
     
     static FromBuffer = function(_buffer)
     {
-        timestamp = date_create_datetime(1970, 1, 1, 0, 0, buffer_read(_buffer, buffer_u64));
+        // UTC timestamp is stored in milliseconds for some reason
+        timestamp = date_create_datetime(1970, 1, 1, 0, 0, floor(buffer_read(_buffer, buffer_u64) / 1000));
     }
     
     static toString = function()
