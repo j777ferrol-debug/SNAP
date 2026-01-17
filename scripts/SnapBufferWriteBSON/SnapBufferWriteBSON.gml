@@ -13,7 +13,7 @@
 /// @param buffer                      Buffer to write data to
 /// @param struct/array                The data to be encoded. Can contain structs, arrays, strings, and numbers.   N.B. Will not encode ds_list, ds_map etc.
 /// @param [alphabetizeStructs=false]  Whether to alphabetize struct variable names. Incurs a performance penalty is set to <true>
-/// @param [binaryBlobType=undefined]  The binary blob type to use, leave as `undefined` to encode the buffer_type as 128-131. See `subtype` in the spec for more information
+/// @param [binaryBlobType=undefined]  The binary blob type to use, leave as `undefined` to encode the buffer_type as 128-131. See `subtype` in the spec for more information (unsupported in LTS)
 
 /*
     0x00  -  EOO (end of object)
