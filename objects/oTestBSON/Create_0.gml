@@ -27,6 +27,7 @@ struct = {
     objectID: new SnapBSONObjectID(),
     dateTime: new SnapBSONUTCDateTime(),
     regex: new SnapBSONRegex("hello", "world"),
+    jscode: new SnapBSONJSCode("some code"),
     //pointer: ptr(id),
     //instance: id,
 };
