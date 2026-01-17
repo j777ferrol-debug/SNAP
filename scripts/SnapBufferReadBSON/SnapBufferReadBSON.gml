@@ -191,12 +191,10 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
             
         case 0x0D: // JS Code
             // Skipping past because unsupported
-            buffer_read(_buffer, buffer_s32); // Skip past string size
-            buffer_read(_buffer, buffer_string);
-            
-            show_debug_message("SNAP Warning: Unsupported BSON type detected \"js code\" for \"" + _name + "\". Skipping past.");
-            
-            return undefined;
+            var _value = new SnapBSONJSCode();
+            _value.FromBuffer(_buffer);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
         break;
         
         case 0x0E: // symbol
