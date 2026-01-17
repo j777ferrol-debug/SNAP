@@ -26,6 +26,7 @@ struct = {
     func : function() {},
     objectID: new SnapBSONObjectID(),
     dateTime: new SnapBSONUTCDateTime(),
+    regex: new SnapBSONRegex("hello", "world"),
     //pointer: ptr(id),
     //instance: id,
 };

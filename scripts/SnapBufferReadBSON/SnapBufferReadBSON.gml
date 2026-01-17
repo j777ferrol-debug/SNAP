@@ -163,18 +163,15 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
         break;
         
         case 0x0A: // <null>
-            _value = pointer_null;
-            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
-            return _value;
+            __SnapBufferReadBSONAddToContainer(_container, _name, pointer_null);
+            return pointer_null;
         break;
         
         case 0x0B: // <regex>
-            // Skip past this for now
-            buffer_read(_buffer, buffer_string);
-            buffer_read(_buffer, buffer_string);
-            return undefined;
-            
-            show_debug_message("SNAP Warning: Unsupported BSON type detected \"regex\" for \"" + _name + "\". Skipping past.");
+            var _value = new SnapBSONRegex();
+            _value.FromBuffer(_buffer);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
         break;
         
         case 0x0C: // DB pointer
@@ -204,7 +201,6 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
         
         case 0x0E: // symbol
             // Deprecated so we skip past
-            // Skipping past because unsupported
             buffer_read(_buffer, buffer_s32); // Skip past string size
             buffer_read(_buffer, buffer_string);
             
@@ -253,12 +249,10 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
         break;
         
         case 0xFF: // minkey
-            show_debug_message("SNAP Warning: Unsupported BSON type detected \"minkey\" for \"" + _name + "\". Skipping past.");
             return undefined;
         break;
         
         case 0x7F: // maxkey
-            show_debug_message("SNAP Warning: Unsupported BSON type detected \"maxkey\" for \"" + _name + "\". Skipping past.");
             return undefined;
         break;
         
