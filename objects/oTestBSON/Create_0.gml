@@ -33,5 +33,4 @@ struct = {
 };
 
 buffer = SnapBufferWriteBSON(ScratchBuffer(), struct);
-buffer_save(buffer, "/Users/alun/Desktop/test.bson");
 show_debug_message(SnapVisualize(SnapBufferReadBSON(buffer, 0)));
