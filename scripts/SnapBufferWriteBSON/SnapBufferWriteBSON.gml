@@ -2,7 +2,7 @@
 /// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for interchanging data
 /// across networks due to it being fast and somewhat efficient.
 ///
-///	Unsupported non-deprecated types: objectID, UTCdatetime, null, uint64, regex, JScode, float128, min key, max key.
+///	Unsupported non-deprecated types: uint64 and float128
 /// LTS does not support writing binary blobs.
 ///
 /// BSON spec:   `https://bsonspec.org/spec.html`
