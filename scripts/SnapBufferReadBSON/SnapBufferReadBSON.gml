@@ -20,16 +20,22 @@
     0x01  -  double
     0x02  -  string
     0x03  -  document (struct)
-    0x04  -  array
+    0x04  -  array (encoded as a document)
     0x05  -  binary blob
-    0x06  -  <undefined>
+    0x06  -  <undefined>        (deprecated)
     0x07  -  object ID
     0x08  -  boolean
     0x09  -  UTCdatetime
     0x0A  -  <null>
+    0x0B  -  regex
+    0x0C  -  DB pointer         (deprecated)
+    0x0D  -  JS code            (unsupported)
+    0x0E  -  symbol             (deprecated)
+    0x0F  -  JS code with scope (deprecated)
     0x10  -  int32
-	0x11  -  uint64
+	0x11  -  uint64             (unsupported)
 	0x12  -  int64
+    0x13  -  decimal128         (unsupported)
 */
 
 function SnapBufferReadBSON(_buffer, _offset, _skipEmbeddedBuffers = false, _embeddedBufferType = undefined)
@@ -90,17 +96,17 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
             return _array;
         break;
         
+        case 0x01: // f64
+            var _value = buffer_read(_buffer, buffer_f64);
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value
+        break;
+        
         case 0x02: // string
             buffer_read(_buffer, buffer_s32); // Skip past string size
             var _value = buffer_read(_buffer, buffer_string);
             __SnapBufferReadBSONAddToContainer(_container, _name, _value);
             return _value;
-        break;
-        
-        case 0x01: // f64
-            var _value = buffer_read(_buffer, buffer_f64);
-            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
-            return _value
         break;
         
         case 0x05: // Buffer blob
@@ -154,6 +160,70 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
             _value.FromBuffer(_buffer);
             __SnapBufferReadBSONAddToContainer(_container, _name, _value);
             return _value;
+        break;
+        
+        case 0x0A: // <null>
+            _value = pointer_null;
+            __SnapBufferReadBSONAddToContainer(_container, _name, _value);
+            return _value;
+        break;
+        
+        case 0x0B: // <regex>
+            // Skip past this for now
+            buffer_read(_buffer, buffer_string);
+            buffer_read(_buffer, buffer_string);
+            return undefined;
+            
+            show_debug_message("SNAP Warning: Unsupported BSON type detected \"regex\" for \"" + _name + "\". Skipping past.");
+        break;
+        
+        case 0x0C: // DB pointer
+            // Deprecated so we skip past it
+            buffer_read(_buffer, buffer_s32); // Skip past string size
+            buffer_read(_buffer, buffer_string);
+            
+            repeat(4)
+            {
+                buffer_read(_buffer, buffer_u32);
+            }
+            
+            show_debug_message("SNAP Warning: Deprecated BSON type detected \"db pointer\" for \"" + _name + "\". Skipping past.");
+            
+            return undefined;
+        break;
+            
+        case 0x0D: // JS Code
+            // Skipping past because unsupported
+            buffer_read(_buffer, buffer_s32); // Skip past string size
+            buffer_read(_buffer, buffer_string);
+            
+            show_debug_message("SNAP Warning: Unsupported BSON type detected \"js code\" for \"" + _name + "\". Skipping past.");
+            
+            return undefined;
+        break;
+        
+        case 0x0E: // symbol
+            // Deprecated so we skip past
+            // Skipping past because unsupported
+            buffer_read(_buffer, buffer_s32); // Skip past string size
+            buffer_read(_buffer, buffer_string);
+            
+            show_debug_message("SNAP Warning: Deprecated BSON type detected \"symbol\" for \"" + _name + "\". Skipping past.");
+            return _value;
+        break;
+            
+        case 0x0F: // JS Code with scope
+            // Skipping past because unsupported
+            buffer_read(_buffer, buffer_s32); // Skip past string size
+            buffer_read(_buffer, buffer_string);
+            
+            var _size = buffer_read(_buffer, buffer_s32);
+            buffer_seek(_buffer, buffer_seek_relative, _size - 4);
+            
+            show_debug_message("SNAP Warning: Deprecated BSON type detected \"js code with scope\" for \"" + _name + "\". Skipping past.");
+            
+            return undefined;
+        break;
         
         case 0x10: // s32
             var _value = buffer_read(_buffer, buffer_s32);
@@ -161,10 +231,35 @@ function __SnapFromBSONValue(_buffer, _container, _skipEmbeddedBuffers, _embedde
             return buffer_read(_buffer, _value);
         break;
         
+        case 0x11: // u64
+            int64(buffer_read(_buffer, buffer_u64));
+            
+            show_debug_message("SNAP Warning: Unsupported BSON type detected \"uint64\" for \"" + _name + "\". Skipping past.");
+            return undefined;
+        break;
+        
         case 0x12: // s64
             var _value = int64(buffer_read(_buffer, buffer_u64));
             __SnapBufferReadBSONAddToContainer(_container, _name, _value);
-            return _value
+            return _value;
+        break;
+        
+        case 0x13: // decimal128
+            int64(buffer_read(_buffer, buffer_u64));
+            int64(buffer_read(_buffer, buffer_u64));
+            
+            show_debug_message("SNAP Warning: Unsupported BSON type detected \"decimal128\" for \"" + _name + "\". Skipping past.");
+            return undefined;
+        break;
+        
+        case 0xFF: // minkey
+            show_debug_message("SNAP Warning: Unsupported BSON type detected \"minkey\" for \"" + _name + "\". Skipping past.");
+            return undefined;
+        break;
+        
+        case 0x7F: // maxkey
+            show_debug_message("SNAP Warning: Unsupported BSON type detected \"maxkey\" for \"" + _name + "\". Skipping past.");
+            return undefined;
         break;
         
         default:

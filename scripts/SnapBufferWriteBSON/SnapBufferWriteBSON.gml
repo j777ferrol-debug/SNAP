@@ -22,14 +22,20 @@
     0x03  -  document (struct)
     0x04  -  array (encoded as a document)
     0x05  -  binary blob
-    0x06  -  <undefined>
+    0x06  -  <undefined>        (deprecated)
     0x07  -  object ID
     0x08  -  boolean
     0x09  -  UTCdatetime
     0x0A  -  <null>
+    0x0B  -  regex
+    0x0C  -  DB pointer         (deprecated)
+    0x0D  -  JS code            (unsupported)
+    0x0E  -  symbol             (deprecated)
+    0x0F  -  JS code with scope (deprecated)
     0x10  -  int32
-	0x11  -  uint64
+	0x11  -  uint64             (unsupported)
 	0x12  -  int64
+    0x13  -  decimal128         (unsupported)
 */
 
 function SnapBufferWriteBSON(_buffer, _value, _alphabetizeStructs = false, _binaryBlobType = undefined)
@@ -261,6 +267,11 @@ function __SnapBufferWriteBSON(_buffer, _name, _value, _alphabetizeStructs, _bin
 			show_message("Handle \"" + typeof(_value) + "\" not supported");
 		}
     }
+    else if (is_ptr(_value) && _value == pointer_null)
+    {
+        buffer_write(_buffer, buffer_u8, 0x0A); // null
+        buffer_write(_buffer, buffer_string, _name);
+    }
     else
     {
         show_message("Datatype \"" + typeof(_value) + "\" not supported");
@@ -394,6 +405,11 @@ function __SnapBufferWriteBSONLegacy(_buffer, _name, _value, _alphabetizeStructs
         buffer_write(_buffer, buffer_u8, 0x12); //u64
         buffer_write(_buffer, buffer_string, _name);
         buffer_write(_buffer, buffer_u64, _value);
+    }
+    else if (is_ptr(_value) && _value == pointer_null)
+    {
+        buffer_write(_buffer, buffer_u8, 0x0A); // null
+        buffer_write(_buffer, buffer_string, _name);
     }
     else
     {
