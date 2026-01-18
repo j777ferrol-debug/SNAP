@@ -3,6 +3,7 @@
   "resourceVersion": "1.6",
   "name": "SNAP",
   "resources": [
+    {"id":{"name":"SnapBSONJSCode","path":"scripts/SnapBSONJSCode/SnapBSONJSCode.yy",},"order":3,},
     {"id":{"name":"oTestHash","path":"objects/oTestHash/oTestHash.yy",},"order":19,},
     {"id":{"name":"oTestReconstruction","path":"objects/oTestReconstruction/oTestReconstruction.yy",},"order":22,},
     {"id":{"name":"SnapToJSON","path":"scripts/SnapToJSON/SnapToJSON.yy",},"order":0,},
@@ -50,6 +51,7 @@
     {"id":{"name":"oTestVDF","path":"objects/oTestVDF/oTestVDF.yy",},"order":21,},
     {"id":{"name":"SnapStringify","path":"scripts/SnapStringify/SnapStringify.yy",},"order":8,},
     {"id":{"name":"SnapBufferReadBinary","path":"scripts/SnapBufferReadBinary/SnapBufferReadBinary.yy",},"order":1,},
+    {"id":{"name":"SnapBSONRegex","path":"scripts/SnapBSONRegex/SnapBSONRegex.yy",},"order":2,},
     {"id":{"name":"SnapBufferRead2DArray","path":"scripts/SnapBufferRead2DArray/SnapBufferRead2DArray.yy",},"order":3,},
     {"id":{"name":"SnapBufferReadXML","path":"scripts/SnapBufferReadXML/SnapBufferReadXML.yy",},"order":3,},
     {"id":{"name":"SnapShallowAdd","path":"scripts/SnapShallowAdd/SnapShallowAdd.yy",},"order":7,},
@@ -126,6 +128,7 @@
   "Folders": [
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"SNAP","folderPath":"folders/SNAP.yy","order":0,},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"BSON","folderPath":"folders/SNAP/BSON.yy","order":17,},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"BSONExtendedTypes","folderPath":"folders/SNAP/BSON/BSONExtendedTypes.yy","order":2,},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"CSV","folderPath":"folders/SNAP/CSV.yy","order":5,},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Custom Binary","folderPath":"folders/SNAP/Custom Binary.yy","order":7,},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"GML","folderPath":"folders/SNAP/GML.yy","order":11,},
@@ -140,7 +143,6 @@
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"VDF","folderPath":"folders/SNAP/VDF.yy","order":14,},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"XML","folderPath":"folders/SNAP/XML.yy","order":9,},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"YAML","folderPath":"folders/SNAP/YAML.yy","order":4,},
-    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"BSONExtendedTypes","folderPath":"folders/SNAP/BSON/BSONExtendedTypes.yy","order":2,},
   ],
   "AudioGroups": [
     {"resourceType":"GMAudioGroup","resourceVersion":"1.3","name":"audiogroup_default","targets":-1,},
