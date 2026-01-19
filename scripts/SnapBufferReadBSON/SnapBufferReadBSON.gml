@@ -1,9 +1,10 @@
 // Feather disable all
-/// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for interchanging data
-/// across networks due to it being fast and somewhat efficient. This particular BSON reader will not validate
-/// the sizes of containers or strings.
+
+/// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for
+/// interchanging data across networks due to it being fast and somewhat efficient. This particular
+/// BSON reader will not validate the sizes of containers or strings.
 ///
-///	Unsupported non-deprecated types: uint64 and float128
+///	N.B. This function does not support uint64 and float128 types.
 ///
 /// BSON spec:   `https://bsonspec.org/spec.html`
 /// BSON tester: `https://mcraiha.github.io/tools/BSONhexToJSON/bsonfiletojson.html`
@@ -12,8 +13,8 @@
 /// 
 /// @param buffer                           Binary data to be decoded, created by SnapBufferWriteBSON()
 /// @param offset                           Start position for binary decoding in the buffer. Defaults to 0, the start of the buffer
-/// @param [skipEmbeddedBuffers=true]       Skip past any embedded buffers. Defaults to 0.
-/// @param [embeddedBufferType=undefined]   Overrides the internal buffer subtype for embedded buffers, see `subtype` in the spec for more information.
+/// @param [skipEmbeddedBuffers=true]       Skip past any embedded buffers. Defaults to 0
+/// @param [embeddedBufferType=undefined]   Overrides the internal buffer subtype for embedded buffers, see `subtype` in the spec for more information
 
 /*
     0x00  -  EOO (end of object)

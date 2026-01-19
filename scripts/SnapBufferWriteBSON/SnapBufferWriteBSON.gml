@@ -1,9 +1,12 @@
 // Feather disable all
-/// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for interchanging data
-/// across networks due to it being fast and somewhat efficient.
+
+/// BSON is a binary version of JSON popularised by MongoDB, it is a widely used format for
+/// interchanging data across networks due to it being fast and somewhat efficient.
 ///
-///	Unsupported non-deprecated types: uint64 and float128
-/// LTS does not support writing binary blobs.
+///	N.B. This function does not support uint64 and float128 types.
+/// 
+/// N.B. When running on GameMaker LTS 2022, this function does not support writing buffers as
+///      binary blobs.
 ///
 /// BSON spec:   `https://bsonspec.org/spec.html`
 /// BSON tester: `https://mcraiha.github.io/tools/BSONhexToJSON/bsonfiletojson.html`
@@ -12,7 +15,7 @@
 /// 
 /// @param buffer                      Buffer to write data to
 /// @param struct/array                The data to be encoded. Can contain structs, arrays, strings, and numbers.   N.B. Will not encode ds_list, ds_map etc.
-/// @param [alphabetizeStructs=false]  Whether to alphabetize struct variable names. Incurs a performance penalty is set to <true>
+/// @param [alphabetizeStructs=false]  Whether to alphabetize struct variable names. Incurs a performance penalty if set to `true`
 /// @param [binaryBlobType=undefined]  The binary blob type to use, leave as `undefined` to encode the buffer_type as 128-131. See `subtype` in the spec for more information (unsupported in LTS)
 
 /*
