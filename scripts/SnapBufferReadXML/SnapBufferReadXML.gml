@@ -1,17 +1,33 @@
 // Feather disable all
-/// Decodes XML data stored in a buffer and outputs a sorta-JSON equivalent
+
+/// Decodes XML data stored in a buffer and outputs a sorta-JSON equivalent. If the optional
+/// `destructive` parameter is set to `true` (the default) then the buffer will be modified during
+/// reading. If you set this parameter to `false` then no changes will be made but at a performance
+/// penalty.
 ///
 /// @return Nested struct/array data that represents the contents of the XML data
 /// 
-/// @param buffer  Buffer to read data from
-/// @param offset  Offset in the buffer to read data from
+/// @param buffer              Buffer to read data from
+/// @param offset              Offset in the buffer to read data from
+/// @param size                Number of bytes to read
+/// @param [destructive=true]  Whether it is permitted for the buffer to be permanently modified during reading
 /// 
-/// @jujuadams 2022-10-30
+/// @jujuadams 2026-01-19
 
-function SnapBufferReadXML(_buffer, _offset, _size)
+function SnapBufferReadXML(_buffer, _offset, _size, _destructive = true)
 {
-    var _oldOffset = buffer_tell(_buffer);
-    buffer_seek(_buffer, buffer_seek_start, _offset);
+    if (not _destructive)
+    {
+        //Make a copy of the buffer to avoid modifying it
+        var _oldBuffer = _buffer;
+        _buffer = buffer_create(_size, buffer_fixed, 1);
+        buffer_copy(_oldBuffer, _offset, _size, _buffer, 0);
+    }
+    else
+    {
+        var _oldOffset = buffer_tell(_buffer);
+        buffer_seek(_buffer, buffer_seek_start, _offset);
+    }
     
     var _skip_whitespace = true;
     
@@ -303,7 +319,14 @@ function SnapBufferReadXML(_buffer, _offset, _size)
     
     ds_list_destroy(_stack);
     
-    buffer_seek(_buffer, buffer_seek_start, _oldOffset);
+    if (not _destructive)
+    {
+        buffer_delete(_buffer);
+    }
+    else
+    {
+        buffer_seek(_buffer, buffer_seek_start, _oldOffset);
+    }
     
     return _root;
 }
