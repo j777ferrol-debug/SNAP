@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "ScratchBuffer",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "SNAP",
-    "path": "SNAP.yyp",
+  "$GMScript":"v1",
+  "%Name":"ScratchBuffer",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ScratchBuffer",
+  "parent":{
+    "name":"snap",
+    "path":"snap.yyp",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

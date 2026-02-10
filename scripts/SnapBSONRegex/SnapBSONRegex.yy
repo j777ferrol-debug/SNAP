@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapBSONRegex",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "BSONExtendedTypes",
-    "path": "folders/SNAP/BSON/BSONExtendedTypes.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapBSONRegex",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapBSONRegex",
+  "parent":{
+    "name":"BSONExtendedTypes",
+    "path":"folders/SNAP/BSON/BSONExtendedTypes.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

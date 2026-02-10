@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "TestGlobalConstructor",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "SNAP",
-    "path": "SNAP.yyp",
+  "$GMScript":"v1",
+  "%Name":"TestGlobalConstructor",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"TestGlobalConstructor",
+  "parent":{
+    "name":"snap",
+    "path":"snap.yyp",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapBufferReadTilemapNew",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "Grids & 2D Arrays & Tilemaps",
-    "path": "folders/SNAP/Grids & 2D Arrays & Tilemaps.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapBufferReadTilemapNew",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapBufferReadTilemapNew",
+  "parent":{
+    "name":"Grids & 2D Arrays & Tilemaps",
+    "path":"folders/SNAP/Grids & 2D Arrays & Tilemaps.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

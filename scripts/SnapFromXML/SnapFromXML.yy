@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapFromXML",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "XML",
-    "path": "folders/SNAP/XML.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapFromXML",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapFromXML",
+  "parent":{
+    "name":"XML",
+    "path":"folders/SNAP/XML.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

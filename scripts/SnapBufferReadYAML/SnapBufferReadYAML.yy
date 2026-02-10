@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapBufferReadYAML",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "YAML",
-    "path": "folders/SNAP/YAML.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapBufferReadYAML",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapBufferReadYAML",
+  "parent":{
+    "name":"YAML",
+    "path":"folders/SNAP/YAML.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

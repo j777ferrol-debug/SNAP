@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapBufferWriteMessagePack",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "MessagePack",
-    "path": "folders/SNAP/MessagePack.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapBufferWriteMessagePack",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapBufferWriteMessagePack",
+  "parent":{
+    "name":"MessagePack",
+    "path":"folders/SNAP/MessagePack.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

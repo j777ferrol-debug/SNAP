@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapBufferReadQML",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "QML",
-    "path": "folders/SNAP/QML.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapBufferReadQML",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapBufferReadQML",
+  "parent":{
+    "name":"QML",
+    "path":"folders/SNAP/QML.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

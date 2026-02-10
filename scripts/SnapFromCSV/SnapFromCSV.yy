@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapFromCSV",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "CSV",
-    "path": "folders/SNAP/CSV.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapFromCSV",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapFromCSV",
+  "parent":{
+    "name":"CSV",
+    "path":"folders/SNAP/CSV.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapBufferWriteBSON",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "BSON",
-    "path": "folders/SNAP/BSON.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapBufferWriteBSON",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapBufferWriteBSON",
+  "parent":{
+    "name":"BSON",
+    "path":"folders/SNAP/BSON.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }

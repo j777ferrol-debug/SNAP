@@ -1,11 +1,13 @@
 {
-  "resourceType": "GMScript",
-  "resourceVersion": "1.0",
-  "name": "SnapStringify",
-  "isDnD": false,
-  "isCompatibility": false,
-  "parent": {
-    "name": "Utility",
-    "path": "folders/SNAP/Utility.yy",
+  "$GMScript":"v1",
+  "%Name":"SnapStringify",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SnapStringify",
+  "parent":{
+    "name":"Utility",
+    "path":"folders/SNAP/Utility.yy",
   },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
 }
