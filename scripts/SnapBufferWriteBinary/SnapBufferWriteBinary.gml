@@ -20,6 +20,8 @@
     0x09  -  u64
     0x0A  -  pointer
     0x0B  -  instance ID reference
+	0x0C  -  buffer
+	0x0D  -  vertex buffer
 */
 
 function SnapBufferWriteBinary(_buffer, _value, _alphabetizeStructs = false)
@@ -164,10 +166,35 @@ function __SnapBufferWriteBinary(_buffer, _value, _alphabetizeStructs)
         buffer_write(_buffer, buffer_u8, 0x0A); //pointer
         buffer_write(_buffer, buffer_u64, int64(_value));
     }
-    else if (typeof(_value) == "ref") // is_ref() doesn't exist as of 2022-10-23
+    else if (is_handle(_value))
     {
-        buffer_write(_buffer, buffer_u8, 0x0B); //instance ID reference
-        buffer_write(_buffer, buffer_u64, int64(real(_value))); //Serialize the numeric part of the reference
+        if (instance_exists(_value)) 
+		{
+			buffer_write(_buffer, buffer_u8, 0x0B); //instance ID reference
+        	buffer_write(_buffer, buffer_u64, int64(real(_value))); //Serialize the numeric part of the reference
+		}
+		else if (buffer_exists(_value))
+		{
+			var size = buffer_get_used_size(_value);
+			buffer_write(_buffer, buffer_u8, 0x0C); //raw buffer
+			buffer_write(_buffer, buffer_u8, buffer_get_alignment(_value));
+			buffer_write(_buffer, buffer_u8, buffer_get_type(_value));
+			buffer_write(_buffer, buffer_u64, size);
+			buffer_copy(_value, 0, size, _buffer, buffer_tell(_buffer));
+			buffer_seek(_buffer, buffer_seek_relative, size);
+		}
+		else if (vertex_buffer_exists(_value))
+		{
+			var size = vertex_get_buffer_size(_value)
+			buffer_write(_buffer, buffer_u8, 0x0D); //raw vertex buffer
+			buffer_write(_buffer, buffer_u64, size);
+			buffer_copy_from_vertex_buffer(_value, 0, vertex_get_number(_value), _buffer, buffer_tell(_buffer));
+			buffer_seek(_buffer, buffer_seek_relative, size);
+		}
+		else 
+		{
+			show_message("Datatype \"" + typeof(_value) + "\" not supported");
+		}
     }
     else
     {
@@ -260,10 +287,35 @@ function __SnapBufferWriteBinaryLegacy(_buffer, _value, _alphabetizeStructs)
         buffer_write(_buffer, buffer_u8, 0x0A); //pointer
         buffer_write(_buffer, buffer_u64, int64(_value));
     }
-    else if (typeof(_value) == "ref") // is_ref() doesn't exist as of 2022-10-23
+    else if (is_handle(_value)) // is_ref() doesn't exist as of 2022-10-23
     {
-        buffer_write(_buffer, buffer_u8, 0x0B); //instance ID reference
-        buffer_write(_buffer, buffer_u64, int64(real(_value))); //Serialize the numeric part of the reference
+		if (instance_exists(_value)) 
+		{
+			buffer_write(_buffer, buffer_u8, 0x0B); //instance ID reference
+        	buffer_write(_buffer, buffer_u64, int64(real(_value))); //Serialize the numeric part of the reference
+		}
+		else if (buffer_exists(_value))
+		{
+			var size = buffer_get_used_size(_value);
+			buffer_write(_buffer, buffer_u8, 0x0C); //raw buffer
+			buffer_write(_buffer, buffer_u8, buffer_get_alignment(_value));
+			buffer_write(_buffer, buffer_u8, buffer_get_type(_value));
+			buffer_write(_buffer, buffer_u64, size);
+			buffer_copy(_value, 0, size, _buffer, buffer_tell(_buffer));
+			buffer_seek(_buffer, buffer_seek_relative, size);
+		}
+		else if (vertex_buffer_exists(_value))
+		{
+			var size = vertex_get_buffer_size(_value)
+			buffer_write(_buffer, buffer_u8, 0x0C); //raw vertex buffer
+			buffer_write(_buffer, buffer_u64, size);
+			buffer_copy_from_vertex_buffer(_value, 0, vertex_get_number(_value), _buffer, buffer_tell(_buffer));
+			buffer_seek(_buffer, buffer_seek_relative, size);
+		}
+		else 
+		{
+			show_message("Datatype \"" + typeof(_value) + "\" not supported");
+		}
     }
     else
     {

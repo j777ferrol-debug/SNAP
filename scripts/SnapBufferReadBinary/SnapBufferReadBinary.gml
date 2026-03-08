@@ -19,6 +19,8 @@
     0x09  -  u64
     0x0A  -  pointer
     0x0B  -  instance ID
+	0x0C  -  buffer
+	0x0D  -  vertex buffer
 */
 
 function SnapBufferReadBinary(_buffer, _offset)
@@ -97,7 +99,25 @@ function __SnapFromBinaryValue(_buffer)
         case 0x0B: // instance ID reference
             return real(buffer_read(_buffer, buffer_u64)); //We can't make an instance ID reference so return a real number instead
         break;
-        
+		
+		case 0x0C: // buffer
+			var alignment = buffer_read(_buffer, buffer_u8);
+			var type      = buffer_read(_buffer, buffer_u8);
+			var size      = buffer_read(_buffer, buffer_u64);
+			var buff      = buffer_create(size, type, alignment);
+			buffer_copy(_buffer, buffer_tell(_buffer), size, buff, 0);
+			buffer_seek(_buffer, buffer_seek_relative, size);
+			return buff;
+        break;
+		
+		case 0x0D: // vertex buffer
+			var size = buffer_read(_buffer, buffer_u8);
+			var buff = buffer_create(size, buffer_fixed, 1); //Imposible to get vertex format at runtime
+			buffer_copy(_buffer, buffer_tell(_buffer), size, buff, 0);
+			buffer_seek(_buffer, buffer_seek_relative, size);
+			return buff;
+		break;
+		
         default:
             show_error("SNAP:\nUnsupported datatype " + string(buffer_peek(_buffer, buffer_u8, buffer_tell(_buffer)-1)) + " (position = " + string(buffer_tell(_buffer) - 1) + ")\n ", false);
         break;
